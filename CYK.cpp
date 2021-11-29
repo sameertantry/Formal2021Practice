@@ -1,4 +1,4 @@
-1include "CYK.hpp"
+#include "CYK.hpp"
 
 bool CFG::isCNF() {
   bool ok = true;
