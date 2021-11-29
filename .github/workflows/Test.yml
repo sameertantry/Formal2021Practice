@@ -1,0 +1,24 @@
+name: BuildTest
+
+on:
+  push:
+    branches: [ master, CYK ]
+  pull_request:
+    branches: [ master, CYK ]
+jobs:
+  Build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: "Build and run tests"
+        run : |
+          git clone https://github.com/google/googletest
+          cd googletest
+          cd googletest
+          cmake ..
+          make
+          sudo make install
+          cd ../../
+          cmake tests
+          make
+          ./Test
