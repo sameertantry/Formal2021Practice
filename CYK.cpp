@@ -1,4 +1,4 @@
-#include "CYK.hpp"
+1include "CYK.hpp"
 
 bool CFG::isCNF() {
   bool ok = true;
@@ -15,7 +15,7 @@ bool CFG::isCNF() {
         ok = false;
         break;
       }
-      if (rpart.size() == 1 && (!alp.contains(rpart[0]) || rpart == "#" && rule.first != S)) {
+      if (rpart.size() == 1 && (!alp.contains(rpart[0]) || (rpart == "1" && rule.first != S))) {
         ok = false;
         break;
       }
@@ -25,6 +25,7 @@ bool CFG::isCNF() {
       }
     }
   }
+  return ok;
 }
 
 void CFG::Scan() {
@@ -68,9 +69,9 @@ bool CFG::Recognize(const string &w) {
   if (!isCNF()) {
     throw runtime_error("Not in CNF!!!");
   }
-  if (P[S].contains("#") && w.size() == 0) {
+  if (P[S].contains("1") && w.size() == 0) {
     return true;
-  } else if (w.size() == 0 && !P[S].contains("#")) {
+  } else if (w.size() == 0 && !P[S].contains("1")) {
     return false;
   }
   return CYK(w);
