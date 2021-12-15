@@ -62,4 +62,3 @@ class Grammar {
   char start_;
   vector<Rule> rules_;
 };
-

@@ -5,14 +5,14 @@ class LR0 : public Parser {
   LR0() = delete;
   LR0(const Grammar&);
 
-  bool Recognize(const string& w, Grammar grammar) override {return true;}
-  //bool Recognize(const string& w);
+  bool Recognize(const string& w, Grammar grammar) override { return true; }
+  // bool Recognize(const string& w);
 
   ~LR0() {}
 
  private:
   class Situation {
-  public:
+   public:
     Situation() = delete;
     Situation(const Rule&, size_t);
 
@@ -25,12 +25,12 @@ class LR0 : public Parser {
     const Rule& GetRule() const;
     size_t GetDotPos() const;
 
-  private:
+   private:
     Rule rule_;
     size_t dot_pos_;
   };
   class NFA {
-  public:
+   public:
     NFA() = default;
     set<char> alp;
     vector<set<Situation>> q;
@@ -41,7 +41,7 @@ class LR0 : public Parser {
   Grammar gr_;
   NFA nfa_;
   vector<vector<std::pair<char, int64_t>>> tb_;
-  const std::pair<char, int64_t> win = { 'w', 1 };
+  const std::pair<char, int64_t> win = {'w', 1};
   vector<char> l_;
   void BuildTable();
   void BuildNFA();
@@ -51,4 +51,3 @@ class LR0 : public Parser {
   set<Situation> Closure(const set<Situation>&);
   set<Situation> GoTo(const set<Situation>&, char);
 };
-

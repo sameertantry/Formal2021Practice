@@ -96,14 +96,16 @@ void LR0::BuildNFA() {
   nfa_.start = 0;
   nfa_.q.resize(0);
   int64_t prev_sz = -1;
-  nfa_.q.push_back(Closure({Situation(gr_.RulesWithLeftSide(gr_.GetStart())[0], 0)}));
+  nfa_.q.push_back(
+      Closure({Situation(gr_.RulesWithLeftSide(gr_.GetStart())[0], 0)}));
   nfa_.delta.push_back(map<char, int64_t>());
   while (prev_sz != nfa_.q.size()) {
     prev_sz = nfa_.q.size();
     for (size_t i = 0; i < nfa_.q.size(); ++i) {
       for (char c : nfa_.alp) {
         auto new_state = GoTo(nfa_.q[i], c);
-        if (!new_state.empty() && find(nfa_.q.begin(), nfa_.q.end(), new_state) == nfa_.q.end()) {
+        if (!new_state.empty() &&
+            find(nfa_.q.begin(), nfa_.q.end(), new_state) == nfa_.q.end()) {
           nfa_.q.push_back(new_state);
         }
       }
@@ -117,7 +119,8 @@ void LR0::BuildNFA() {
         nfa_.delta[i][c] = -1;
         continue;
       }
-      nfa_.delta[i][c] = find(nfa_.q.begin(), nfa_.q.end(), new_state) - nfa_.q.begin();
+      nfa_.delta[i][c] =
+          find(nfa_.q.begin(), nfa_.q.end(), new_state) - nfa_.q.begin();
     }
   }
   for (size_t i = 0; i < nfa_.q.size(); ++i) {
@@ -136,7 +139,7 @@ void LR0::BuildNFA() {
 
 void LR0::BuildTable() {
   tb_.assign(nfa_.q.size(),
-             vector<std::pair<char, int64_t>>(nfa_.alp.size() + 1, { '\0', -1 }));
+             vector<std::pair<char, int64_t>>(nfa_.alp.size() + 1, {'\0', -1}));
   l_.resize(nfa_.alp.size() + 1);
   l_[0] = '$';
   for (size_t i = 0; i < nfa_.q.size(); ++i) {
@@ -144,7 +147,7 @@ void LR0::BuildTable() {
     for (auto a : gr_.GetAlp()) {
       int64_t num = nfa_.delta[i][a];
       if (num != -1) {
-        tb_[i][j] = { 's', num };
+        tb_[i][j] = {'s', num};
       }
       l_[j] = a;
       ++j;
@@ -152,15 +155,16 @@ void LR0::BuildTable() {
     for (auto A : gr_.GetNonTerms()) {
       int64_t num = nfa_.delta[i][A];
       if (num != -1) {
-        tb_[i][j] = { 't', num };
+        tb_[i][j] = {'t', num};
       }
       l_[j] = A;
       ++j;
     }
   }
   auto win_sit = Situation(gr_.RulesWithLeftSide(mock_non_term)[0], 1);
-  auto win_state = Closure({ win_sit });
-  int64_t win_state_index = find(nfa_.q.begin(), nfa_.q.end(), win_state) - nfa_.q.begin();
+  auto win_state = Closure({win_sit});
+  int64_t win_state_index =
+      find(nfa_.q.begin(), nfa_.q.end(), win_state) - nfa_.q.begin();
   tb_[win_state_index][0] = win;
 
   for (size_t i : nfa_.term_states) {
@@ -168,11 +172,38 @@ void LR0::BuildTable() {
       auto sit = *(nfa_.q[i].begin());
       auto rule = sit.GetRule();
       auto f = find(gr_.GetRules().begin(), gr_.GetRules().end(), rule);
-      int64_t rule_number =  f - gr_.GetRules().begin();
+      int64_t rule_number = f - gr_.GetRules().begin();
       for (size_t j = 0; j <= gr_.GetAlp().size(); ++j) {
-        tb_[i][j] = { 'r', rule_number };
+        tb_[i][j] = {'r', rule_number};
       }
     }
   }
 }
 
+bool LR0::Recognize(string& w) {
+  w += '$';
+  stack<string> st;
+  st.push("0");
+  size_t i = 0;
+  while (i <= w.size()) {
+    int64_t cur_st = stoi(st.top());
+    if (tb_[cur_st][num_[w[i]]].first == 's') {
+      st.push("" + w[i]);
+      st.push(std::to_string(tb_[cur_st][num_[w[i]]].second));
+      ++i;
+    } else if (tb_[cur_st][num_[w[i]]] == win) {
+      return true;
+    } else if (tb_[cur_st][num_[w[i]]].first == 'r') {
+      Rule rule = gr_.GetRules()[tb_[cur_st][num_[w[i]]].second];
+      for (size_t k = 0; k < rule.GetRight().size(); ++k) {
+        st.pop(), st.pop();
+      }
+      int64_t prev_st = stoi(st.top());
+      st.push("" + rule.GetLeft());
+      st.push(std::to_string(tb_[prev_st][num_[rule.GetLeft()]].second));
+    } else {
+      return false;
+    }
+  }
+  return false;
+}

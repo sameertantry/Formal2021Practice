@@ -63,4 +63,3 @@ vector<Rule> Grammar::RulesWithLeftSide(char left) const {
 void Grammar::SetStart(char c) { start_ = c; }
 
 char Grammar::GetStart() const { return start_; }
-
