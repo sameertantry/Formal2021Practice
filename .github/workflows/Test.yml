@@ -1,0 +1,24 @@
+name: TestEarley
+
+on:
+  push:
+    branches: [ master, LR0 ]
+  pull_request:
+    branches: [ master, LR0 ]
+jobs:
+  Build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: "Build and run tests"
+        run : |
+          git clone https://github.com/google/googletest
+          cd googletest
+          cd googletest
+          cmake ..
+          make
+          sudo make install
+          cd ../../
+          cmake test
+          make
+          ./TestLR
